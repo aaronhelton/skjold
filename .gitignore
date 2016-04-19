@@ -1,0 +1,11 @@
+db.sqlite3
+*.pyc
+venv
+venv/*
+._*
+db
+db/*
+log*
+semdata
+semdata/*
+gunicorn_start.sh
