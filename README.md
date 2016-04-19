@@ -5,7 +5,53 @@ This repository aims to provide a generic web platform to serve and manage RDF d
 
 It is a Django application backed by RDFLib-SQLAlchemy on a Postgres database.
 
-Install instructions and other documentation forthcoming.
+Quick Start
+-----------
+
+Make sure you have a Postgres database installed and running. Create a user and database for your application. The default username:password combo is skjold:password, and the default database name is skjold. 
+
+Clone the repository and install the requirements:
+
+    $ pip install -r requirements.txt
+
+Run migrations:
+
+    $ ./manage.py migrate
+
+Create a superuser:
+
+    $ ./manage.py createsuperuser
+
+Run the loadstor management command to populate your database. Make sure to supply both a path to a RDF file and the name of the graph you want to use for it:
+
+    $ ./manage.py loadstor /path/to/rdf/data.ttl graphname
+
+Now you can run the server and point your browser to, e.g., http://localhost:4000/admin where you can login and manage the RDF graph.
+
+Notes
+-----
+
+The effort to harmonize Django's data models with those of RDFLib-SQLAlchemy required additions to the RDFLib-SQLAlchemy library. You'll need >= version 0.3.dev0 (clone https://github.com/RDFLib/rdflib-sqlalchemy) to make use of these additions. 
+
+Also, I have added my own managed model (the RDFLib-SQLAlchemy models are unmanaged) that holds copies of each unique RDF resource (i.e., anything that has rdf:type) to act as an entry point for the set of inbound and outbound triples associated with it. For instance, 
+
+    ns1:Foo a owl:Thing ; 
+
+would have an entry in the Resource model, but it has to be copied there upon the creation of any typed thing. This is a workaround for Django's inability to have compound primary keys. 
+
+To Do
+-----
+
+These are the things I think I still need to do, but I haven't fully evaluated all of them.
+
+1. Add more information to the delete_confirm page to indicate that deleting a Resource will also delete the triples associated with it, which while not strictly necessary, is nevertheless indicated as a time-saving measure; otherwise users will have to hunt down all associated triples by hand.
+2. Build out the Resource creation admin interface. As it stands, one must create the resource and then create each separate triple from scratch. At the very least, adding triples from a Resource admin page should populate the subject or object portion of the triple.
+3. Create a basic HTML (non-admin) interface for viewing graphs and browsing by rdf:type.
+4. Build out non-HTML views like JSON-LD, RDF/Turtle, and RDF/XML.
+5. Search.
+6. Better import tools.
+7. Build out API hooks to support special-purpose applications drawn from the general-purpose platform. 
+8. SPARQL endpoint?
 
 Contributing
 ------------
