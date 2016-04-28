@@ -17,3 +17,9 @@ def model_pre_change(sender, **kwargs):
 
   for t in graph.triples((None,None,res)):
     graph.remove(t)
+
+# create or update Resource table if a new subject is entered into one of our non-namespace tables
+@receiver(pre_save, sender=TypeStatement)
+def model_pre_change(sender, **kwargs):
+  target_subject = graph.compute_qname(kwargs['instance'].member)
+  Resource.objects.update_or_create(subject="".join([target_subject[1],target_subject[2]]))

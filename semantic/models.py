@@ -7,6 +7,13 @@ from rdflib_sqlalchemy.SQLAlchemy import SQLAlchemy
 graph = settings.GRAPH
 identifier = settings.IDENTIFIER
 
+class Resource(models.Model):
+  subject = models.URLField(primary_key=True)
+
+  def __str__(self):
+    return self.subject
+
+
 class Namespace(models.Model):
   prefix = models.CharField(max_length=200, primary_key=True)
   # Because namespace URIs can end in # or /, it is unsafe to URLify them
@@ -36,7 +43,8 @@ class AssertionStatement(models.Model):
     return graph.qname(self.subject) + " " + graph.qname(self.predicate) + " " + graph.qname(self.object)
 
 class LiteralStatement(models.Model):
-  subject = models.URLField()
+  #subject = models.URLField() 
+  subject = models.ForeignKey(Resource, to_field='subject', db_column='subject')
   predicate = models.URLField()
   object = models.TextField()
   context = models.TextField()
@@ -49,7 +57,7 @@ class LiteralStatement(models.Model):
     managed = False
 
   def __str__(self):
-    return graph.qname(self.subject) + " " + graph.qname(self.predicate) + " " + self.object
+    return graph.qname(self.subject.subject) + " " + graph.qname(self.predicate) + " " + self.object
 
 class QuotedStatement(models.Model):
   id = models.AutoField(primary_key=True)
@@ -84,25 +92,21 @@ class TypeStatement(models.Model):
 
 # Managed models
 
-class Resource(models.Model):
-  subject = models.TextField()
-  namespace = models.ForeignKey(Namespace,blank=True,null=True)
+#class Resource(models.Model):
+#  subject = models.URLField(primary_key=True)
 
-  def __str__(self):
-    if self.namespace:
-      return self.namespace.uri + self.subject
-    else:
-      return self.subject
+#  def __str__(self):
+#    return self.subject
 
-  def get_outbound_assertions(self):
-    return AssertionStatement.objects.all().filter(subject=self.__str__)
+#  def get_outbound_assertions(self):
+#    return AssertionStatement.objects.filter(subject=self)
 
-  def get_inbound_assertions(self):
-    return AssertionStatement.objects.all().filter(object=self.__str__)
+#  def get_inbound_assertions(self):
+#    return AssertionStatement.objects.filter(object=self)
 
-  def get_outbound_literals(self):
-    return LiteralStatement.objects.all().filter(subject=self.__str__)
+#  def get_outbound_literals(self):
+#    return LiteralStatement.objects.filter(subject=self)
 
-  def triples(self):
-    return list(graph.triples((self.__str__(),None,None))) + list(graph.triples((None,None,self.__str__())))
+#  def triples(self):
+#    return list(graph.triples((self.__str__(),None,None))) + list(graph.triples((None,None,self.__str__())))
 

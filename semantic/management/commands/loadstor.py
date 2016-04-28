@@ -30,9 +30,7 @@ class Command(BaseCommand):
 
     # need to copy a unique set of resources to the Resource table
     for ts in TypeStatement.objects.values_list('member',flat=True):
-      target_subject = graph.compute_qname(ts)
-      Resource.objects.update_or_create(subject=target_subject[2],namespace=Namespace.objects.get(pk=target_subject[0]))
-
+      Resource.objects.update_or_create(subject=ts)
 
     graph.close()
 
