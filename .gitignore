@@ -9,3 +9,4 @@ log*
 semdata
 semdata/*
 gunicorn_start.sh
+*.swp
