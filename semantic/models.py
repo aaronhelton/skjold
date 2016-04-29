@@ -29,9 +29,11 @@ class Namespace(models.Model):
 class AssertionStatement(models.Model):
   id = models.AutoField(primary_key=True)
   # It is safe to force URLs here
-  subject = models.URLField()
+  #subject = models.URLField()
+  subject = models.ForeignKey(Resource, to_field='subject', db_column='subject', related_name='as_subject')
   predicate = models.URLField()
-  object = models.URLField()
+  #object = models.URLField()
+  object = models.ForeignKey(Resource, to_field='subject', db_column='object', related_name='as_object')
   context = models.TextField()
   termcomb = models.IntegerField()
 
@@ -40,7 +42,7 @@ class AssertionStatement(models.Model):
     managed = False
 
   def __str__(self):
-    return graph.qname(self.subject) + " " + graph.qname(self.predicate) + " " + graph.qname(self.object)
+    return graph.qname(self.subject.subject) + " " + graph.qname(self.predicate) + " " + graph.qname(self.object.subject)
 
 class LiteralStatement(models.Model):
   #subject = models.URLField() 
@@ -61,7 +63,8 @@ class LiteralStatement(models.Model):
 
 class QuotedStatement(models.Model):
   id = models.AutoField(primary_key=True)
-  subject = models.URLField()
+  #subject = models.URLField()
+  subject = models.ForeignKey(Resource, to_field='subject', db_column='subject')
   predicate = models.URLField()
   object = models.TextField()
   context = models.TextField()
@@ -78,7 +81,8 @@ class QuotedStatement(models.Model):
 
 class TypeStatement(models.Model):
   id = models.AutoField(primary_key=True)
-  member = models.URLField()
+  #member = models.URLField()
+  member = models.ForeignKey(Resource, to_field='subject', db_column='member')
   klass = models.URLField()
   context = models.TextField()
   termcomb = models.IntegerField()
@@ -88,7 +92,7 @@ class TypeStatement(models.Model):
     managed = False
 
   def __str__(self):
-    return graph.qname(self.member) + " " + graph.qname(RDF.type) + " " + graph.qname(self.klass) + " (" + self.context + ")"
+    return graph.qname(self.member.subject) + " " + graph.qname(RDF.type) + " " + graph.qname(self.klass) + " (" + self.context + ")"
 
 # Managed models
 
