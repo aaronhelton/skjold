@@ -5,7 +5,7 @@ from django.conf import settings
 graph = settings.GRAPH
 
 # Register your models here.
-from .models import Namespace, AssertionStatement, LiteralStatement, QuotedStatement, TypeStatement, Resource
+from .models import Namespace, AssertionStatement, LiteralStatement, QuotedStatement, TypeStatement, Resource, Klass, Predicate
 
 class LiteralsInline(admin.StackedInline):
   model = LiteralStatement
@@ -24,3 +24,5 @@ admin.site.register(LiteralStatement)
 admin.site.register(QuotedStatement)
 admin.site.register(TypeStatement)
 admin.site.register(Resource, ResourceAdmin)
+admin.site.register(Klass)
+admin.site.register(Predicate)

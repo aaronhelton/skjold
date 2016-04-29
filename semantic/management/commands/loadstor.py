@@ -7,7 +7,7 @@ from rdflib.util import guess_format
 from django.conf import settings
 import requests
 import os, json
-from semantic.models import TypeStatement, Resource, Namespace
+from semantic.models import TypeStatement, Resource, Namespace, AssertionStatement, LiteralStatement, QuotedStatement, Klass, Predicate
 
 class Command(BaseCommand):
   help = "Load RDF into your local data store."
@@ -31,6 +31,19 @@ class Command(BaseCommand):
     # need to copy a unique set of resources to the Resource table
     for ts in TypeStatement.objects.values_list('member',flat=True):
       Resource.objects.update_or_create(subject=ts)
+
+    # and unique class names and predicates to their own tables
+    for a in AssertionStatement.objects.values_list('predicate',flat=True):
+      Predicate.objects.update_or_create(value=a)
+
+    for l in LiteralStatement.objects.values_list('predicate',flat=True):
+      Predicate.objects.update_or_create(value=l)
+
+    for q in QuotedStatement.objects.values_list('predicate',flat=True):
+      Predicate.objects.update_or_create(value=q)
+
+    for k in TypeStatement.objects.values_list('klass',flat=True):
+      Klass.objects.update_or_create(value=k)
 
     graph.close()
 
