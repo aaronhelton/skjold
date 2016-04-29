@@ -9,6 +9,17 @@ from .models import Namespace, AssertionStatement, LiteralStatement, QuotedState
 
 class LiteralsInline(admin.StackedInline):
   model = LiteralStatement
+  extra = 0
+
+class AsSubjectInline(admin.TabularInline):
+  model = AssertionStatement
+  fk_name = 'subject'
+  extra = 0
+
+class AsObjectInline(admin.TabularInline):
+  model = AssertionStatement
+  fk_name = 'object'
+  extra = 0
 
 class ResourceAdmin(admin.ModelAdmin):
   fieldsets = [
@@ -16,7 +27,7 @@ class ResourceAdmin(admin.ModelAdmin):
       'fields': ['subject'],
     }),
   ]
-  inlines = [ LiteralsInline ]
+  inlines = [ AsSubjectInline, AsObjectInline, LiteralsInline ]
 
 admin.site.register(Namespace)
 admin.site.register(AssertionStatement)
