@@ -7,7 +7,7 @@ from rdflib.util import guess_format
 from django.conf import settings
 import requests
 import os, json
-from semantic.models import TypeStatement, Resource, Namespace, AssertionStatement, LiteralStatement, QuotedStatement, Klass, Predicate
+from semantic.models import TypeStatement, Resource, Namespace, AssertionStatement, LiteralStatement, QuotedStatement, Klass, Predicate, Context
 
 class Command(BaseCommand):
   help = "Load RDF into your local data store."
@@ -44,6 +44,9 @@ class Command(BaseCommand):
 
     for k in TypeStatement.objects.values_list('klass',flat=True):
       Klass.objects.update_or_create(value=k)
+
+    for c in TypeStatement.objects.values_list('context',flat=True):
+      Context.objects.update_or_create(value=c)
 
     graph.close()
 

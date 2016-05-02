@@ -29,6 +29,12 @@ class Predicate(models.Model):
   def __str__(self):
     return self.value
 
+class Context(models.Model):
+  value = models.TextField(primary_key=True)
+
+  def __str__(self):
+    return self.value
+
 #unmanaged models from rdflib_sqlalchemy
 class Namespace(models.Model):
   prefix = models.CharField(max_length=200, primary_key=True)
@@ -51,7 +57,8 @@ class AssertionStatement(models.Model):
   predicate = models.ForeignKey(Predicate, to_field='value', db_column='predicate')
   #object = models.URLField()
   object = models.ForeignKey(Resource, to_field='subject', db_column='object', related_name='as_object')
-  context = models.TextField()
+  #context = models.TextField()
+  context = models.ForeignKey(Context, to_field='value', db_column='context')
   termcomb = models.IntegerField()
 
   class Meta:
@@ -64,9 +71,11 @@ class AssertionStatement(models.Model):
 class LiteralStatement(models.Model):
   #subject = models.URLField() 
   subject = models.ForeignKey(Resource, to_field='subject', db_column='subject')
-  predicate = models.URLField()
+  #predicate = models.URLField()
+  predicate = models.ForeignKey(Predicate, to_field='value', db_column='predicate')
   object = models.TextField()
-  context = models.TextField()
+  #context = models.TextField()
+  context = models.ForeignKey(Context, to_field='value', db_column='context')
   termcomb = models.IntegerField()
   objlanguage = models.CharField(max_length=255)
   objdatatype = models.CharField(max_length=255)
@@ -76,7 +85,7 @@ class LiteralStatement(models.Model):
     managed = False
 
   def __str__(self):
-    return graph.qname(self.subject.subject) + " " + graph.qname(self.predicate) + " " + self.object
+    return graph.qname(self.subject.subject) + " " + graph.qname(self.predicate.value) + " " + self.object
 
 class QuotedStatement(models.Model):
   id = models.AutoField(primary_key=True)
@@ -84,7 +93,8 @@ class QuotedStatement(models.Model):
   subject = models.ForeignKey(Resource, to_field='subject', db_column='subject')
   predicate = models.URLField()
   object = models.TextField()
-  context = models.TextField()
+  #context = models.TextField()
+  context = models.ForeignKey(Context, to_field='value', db_column='context')
   termcomb = models.IntegerField()
   objlanguage = models.CharField(max_length=255)
   objdatatype = models.CharField(max_length=255)
@@ -101,7 +111,8 @@ class TypeStatement(models.Model):
   #member = models.URLField()
   member = models.ForeignKey(Resource, to_field='subject', db_column='member')
   klass = models.URLField()
-  context = models.TextField()
+  #context = models.TextField()
+  context = models.ForeignKey(Context, to_field='value', db_column='context')
   termcomb = models.IntegerField()
 
   class Meta:
@@ -109,4 +120,4 @@ class TypeStatement(models.Model):
     managed = False
 
   def __str__(self):
-    return graph.qname(self.member.subject) + " " + graph.qname(RDF.type) + " " + graph.qname(self.klass) + " (" + self.context + ")"
+    return graph.qname(self.member.subject) + " " + graph.qname(RDF.type) + " " + graph.qname(self.klass) + " (" + self.context.value + ")"
