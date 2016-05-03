@@ -10,7 +10,7 @@ Quick Start
 
 Make sure you have a Postgres database installed and running. Create a user and database for your application. The default username:password combo is skjold:password, and the default database name is skjold. 
 
-Clone the repository and install the requirements:
+Clone the repository or grab the latest release: https://github.com/aaronhelton/skjold/releases and install the requirements:
 
     $ pip install -r requirements.txt
 
