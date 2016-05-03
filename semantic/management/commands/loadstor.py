@@ -7,7 +7,7 @@ from rdflib.util import guess_format
 from django.conf import settings
 import requests
 import os, json
-from semantic.models import TypeStatement, Resource, Namespace, AssertionStatement, LiteralStatement, QuotedStatement, Klass, Predicate, Context
+from semantic.models import TypeStatement, Resource, Namespace, AssertedStatement, LiteralStatement, QuotedStatement, Klass, Predicate, Context
 
 class Command(BaseCommand):
   help = "Load RDF into your local data store."
@@ -33,7 +33,7 @@ class Command(BaseCommand):
       Resource.objects.update_or_create(subject=ts)
 
     # and unique class names and predicates to their own tables
-    for a in AssertionStatement.objects.values_list('predicate',flat=True):
+    for a in AssertedStatement.objects.values_list('predicate',flat=True):
       Predicate.objects.update_or_create(value=a)
 
     for l in LiteralStatement.objects.values_list('predicate',flat=True):

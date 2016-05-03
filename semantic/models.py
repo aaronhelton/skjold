@@ -1,8 +1,11 @@
 from django.db import models
 from django.conf import settings
 import hashlib
-from rdflib import ConjunctiveGraph, URIRef, RDF
+from django.core.exceptions import ValidationError
+from rdflib import ConjunctiveGraph, URIRef, Literal, RDF
 from rdflib_sqlalchemy.SQLAlchemy import SQLAlchemy
+from rdflib_sqlalchemy.termutils import type2TermCombination
+from rdflib_sqlalchemy.termutils import statement2TermCombination
 
 graph = settings.GRAPH
 identifier = settings.IDENTIFIER
@@ -48,18 +51,13 @@ class Namespace(models.Model):
   def __str__(self):
     return self.prefix + "|" + self.uri
 
-class AssertionStatement(models.Model):
+class AssertedStatement(models.Model):
   id = models.AutoField(primary_key=True)
-  # It is safe to force URLs here
-  #subject = models.URLField()
   subject = models.ForeignKey(Resource, to_field='subject', db_column='subject', related_name='as_subject')
-  #predicate = models.URLField()
   predicate = models.ForeignKey(Predicate, to_field='value', db_column='predicate')
-  #object = models.URLField()
   object = models.ForeignKey(Resource, to_field='subject', db_column='object', related_name='as_object')
-  #context = models.TextField()
   context = models.ForeignKey(Context, to_field='value', db_column='context')
-  termcomb = models.IntegerField()
+  termcomb = models.IntegerField(default=0)
 
   class Meta:
     db_table = 'kb_' + identifier + '_asserted_statements'
@@ -69,16 +67,16 @@ class AssertionStatement(models.Model):
     return graph.qname(self.subject.subject) + " " + graph.qname(self.predicate.value) + " " + graph.qname(self.object.subject)
 
 class LiteralStatement(models.Model):
-  #subject = models.URLField() 
+  id = models.AutoField(primary_key=True)
   subject = models.ForeignKey(Resource, to_field='subject', db_column='subject')
-  #predicate = models.URLField()
   predicate = models.ForeignKey(Predicate, to_field='value', db_column='predicate')
   object = models.TextField()
-  #context = models.TextField()
   context = models.ForeignKey(Context, to_field='value', db_column='context')
-  termcomb = models.IntegerField()
-  objlanguage = models.CharField(max_length=255)
-  objdatatype = models.CharField(max_length=255)
+  # here, termcomb is built via int(statement2TermCombination(subject, predicate, obj, context))
+  termcomb = models.IntegerField(default=0)
+  # pre-save validation should try to catch that only one of the following is filled in
+  objlanguage = models.CharField(max_length=255, blank=True, null=True)
+  objdatatype = models.CharField(max_length=255, blank=True, null=True)
 
   class Meta:
     db_table = 'kb_' + identifier + '_literal_statements'
@@ -87,17 +85,24 @@ class LiteralStatement(models.Model):
   def __str__(self):
     return graph.qname(self.subject.subject) + " " + graph.qname(self.predicate.value) + " " + self.object
 
+  #overrides
+  def save(self, *args, **kwargs):
+    self.termcomb = int(statement2TermCombination(URIRef(self.subject.subject), URIRef(self.predicate.value), Literal(self.object), graph.get_context(self.context.value)))
+    super(LiteralStatement, self).save(*args, **kwargs)
+
+
+# None of the triple sets I have worked with so far end up in the QuotedStatement model, so I am not
+# making use of it in the admin. If you know what it is/does, by all means feel free to connect it up.
+# I have made it ready and will maintain it to the same degree as the other *Statement models.
 class QuotedStatement(models.Model):
   id = models.AutoField(primary_key=True)
-  #subject = models.URLField()
   subject = models.ForeignKey(Resource, to_field='subject', db_column='subject')
   predicate = models.URLField()
   object = models.TextField()
-  #context = models.TextField()
   context = models.ForeignKey(Context, to_field='value', db_column='context')
-  termcomb = models.IntegerField()
-  objlanguage = models.CharField(max_length=255)
-  objdatatype = models.CharField(max_length=255)
+  termcomb = models.IntegerField(default=0)
+  objlanguage = models.CharField(max_length=255, blank=True, null=True)
+  objdatatype = models.CharField(max_length=255, blank=True, null=True)
 
   class Meta:
     db_table = 'kb_' + identifier + '_quoted_statements'
@@ -106,14 +111,18 @@ class QuotedStatement(models.Model):
   def __str__(self):
     return graph.qname(self.subject) + " " + graph.qname(self.predicate) + " " + self.object
 
+  #overrides
+  def save(self, *args, **kwargs):
+    self.termcomb = int(statement2TermCombination(URIRef(self.subject.subject), URIRef(self.predicate.value), Literal(self.object), graph.get_context(self.context.value)))
+    super(QuotedStatement, self).save(*args, **kwargs)
+
 class TypeStatement(models.Model):
   id = models.AutoField(primary_key=True)
-  #member = models.URLField()
   member = models.ForeignKey(Resource, to_field='subject', db_column='member')
   klass = models.URLField()
-  #context = models.TextField()
   context = models.ForeignKey(Context, to_field='value', db_column='context')
-  termcomb = models.IntegerField()
+  # termcomb needs to be calculated via int(rdflib_sqlalchemy.termutils.type2TermCombo(member,klass,context)) 
+  termcomb = models.IntegerField(default=0)
 
   class Meta:
     db_table = 'kb_' + identifier + '_type_statements'
@@ -121,3 +130,11 @@ class TypeStatement(models.Model):
 
   def __str__(self):
     return graph.qname(self.member.subject) + " " + graph.qname(RDF.type) + " " + graph.qname(self.klass) + " (" + self.context.value + ")"
+
+  #overrides
+  def save(self, *args, **kwargs):
+    # The only problem is that we can't know ahead of time whether our member/klass/context values are of type
+    # BNode, Literal, URIRef, or Variable. Casting and testing for exceptions isn't helpful, so I'm not sure
+    # what approach to take here.
+    self.termcomb = int(type2TermCombination(URIRef(self.member.subject), URIRef(self.klass), graph.get_context(self.context.value)))
+    super(TypeStatement, self).save(*args, **kwargs)

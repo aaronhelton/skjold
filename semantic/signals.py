@@ -3,7 +3,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from rdflib_sqlalchemy.SQLAlchemy import SQLAlchemy
 from rdflib import ConjunctiveGraph, URIRef
-from semantic.models import Namespace, AssertionStatement, LiteralStatement, QuotedStatement, TypeStatement, Resource
+from semantic.models import Namespace, AssertedStatement, LiteralStatement, QuotedStatement, TypeStatement, Resource
 import sys
 
 graph = settings.GRAPH
@@ -21,5 +21,5 @@ def model_pre_change(sender, **kwargs):
 # create or update Resource table if a new subject is entered into one of our non-namespace tables
 @receiver(pre_save, sender=TypeStatement)
 def model_pre_change(sender, **kwargs):
-  target_subject = graph.compute_qname(kwargs['instance'].member)
-  Resource.objects.update_or_create(subject="".join([target_subject[1],target_subject[2]]))
+  target_subject = kwargs['instance'].member
+  Resource.objects.update_or_create(subject=target_subject)
