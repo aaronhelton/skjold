@@ -57,6 +57,7 @@ class AssertedStatement(models.Model):
   predicate = models.ForeignKey(Predicate, to_field='value', db_column='predicate')
   object = models.ForeignKey(Resource, to_field='subject', db_column='object', related_name='as_object')
   context = models.ForeignKey(Context, to_field='value', db_column='context')
+  # termcomb here is calculated via int(statement2TermCombination(subject, predicate, obj, context))
   termcomb = models.IntegerField(default=0)
 
   class Meta:
@@ -65,6 +66,12 @@ class AssertedStatement(models.Model):
 
   def __str__(self):
     return graph.qname(self.subject.subject) + " " + graph.qname(self.predicate.value) + " " + graph.qname(self.object.subject)
+
+  #overrides
+  def save(self, *args, **kwargs):
+    #assumption is all three are URIRef. This might not be true.
+    self.termcomb = int(statement2TermCombination(URIRef(self.subject.subject), URIRef(self.predicate.value), URIRef(self.object.subject), graph.get_context(self.context.value)))
+    super(AssertedStatement, self).save(*args, **kwargs)
 
 class LiteralStatement(models.Model):
   id = models.AutoField(primary_key=True)
