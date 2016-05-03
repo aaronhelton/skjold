@@ -33,25 +33,24 @@ Notes
 
 The effort to harmonize Django's data models with those of RDFLib-SQLAlchemy required additions to the RDFLib-SQLAlchemy library. You'll need >= version 0.3.dev0 (clone https://github.com/RDFLib/rdflib-sqlalchemy) to make use of these additions. 
 
-Also, I have added my own managed model (the RDFLib-SQLAlchemy models are unmanaged) that holds copies of each unique RDF resource (i.e., anything that has rdf:type) to act as an entry point for the set of inbound and outbound triples associated with it. For instance, 
+Also, I have added my own supplementary managed models (the RDFLib-SQLAlchemy models are unmanaged) that hold unique lists of, e.g., Resources, OWL Classes, Predicates, and such. For instance, the contextualized triple 
 
-    ns1:Foo a owl:Thing ; 
+    (s,p,o,c) (ns1:Foo,rdf:type,owl:Thing,context); 
 
-would have an entry in the Resource model, but it has to be copied there upon the creation of any typed thing. This is a workaround for Django's inability to have compound primary keys. 
+would have an entry in the Resource model for ns1:Foo, an entry in the Predicate model for rdf:type, an entry in the Klass model for owl:Thing, and an entry in the Context model for context. 
 
 To Do
 -----
 
 These are the things I think I still need to do, but I haven't fully evaluated all of them.
 
-1. Add more information to the delete_confirm page to indicate that deleting a Resource will also delete the triples associated with it, which while not strictly necessary, is nevertheless indicated as a time-saving measure; otherwise users will have to hunt down all associated triples by hand.
-2. Build out the Resource creation admin interface. As it stands, one must create the resource and then create each separate triple from scratch. At the very least, adding triples from a Resource admin page should populate the subject or object portion of the triple.
-3. Create a basic HTML (non-admin) interface for viewing graphs and browsing by rdf:type.
-4. Build out non-HTML views like JSON-LD, RDF/Turtle, and RDF/XML.
-5. Search.
-6. Better import tools.
-7. Build out API hooks to support special-purpose applications drawn from the general-purpose platform. 
-8. SPARQL endpoint?
+1. Figure out how to import any combination of ontologies and instances without cluttering the graphs.
+2. Build web-based admin for aspect CRUD, complete with roles.
+3. Improve web admin forms for the triplestore, perhaps with autocompletes and more compact views.
+4. Create a basic HTML (non-admin) interface for viewing graphs and browsing by rdf:type.
+5. Build out non-HTML views like JSON-LD, RDF/Turtle, and RDF/XML.
+6. Search.
+7. SPARQL endpoint?
 
 Contributing
 ------------
