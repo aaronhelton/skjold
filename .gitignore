@@ -12,3 +12,5 @@ gunicorn_start.sh
 *.swp
 web
 web/*
+static
+static/*
