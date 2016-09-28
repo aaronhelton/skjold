@@ -5,10 +5,10 @@ This repository aims to provide a generic web platform to serve and manage RDF d
 
 It is a Django application backed by RDFLib-SQLAlchemy on a Postgres database.
 
-Quick Start
+Quick Start (Normal)
 -----------
 
-Make sure you have a Postgres database installed and running. Create a user and database for your application. The default username:password combo is skjold:password, and the default database name is skjold. 
+Make sure you have a Postgres database installed and running. Create a user and database for your application. The default username:password combo is postgres:postgres, and the default database name is postgres. 
 
 Clone the repository and install the requirements:
 
@@ -27,6 +27,43 @@ Run the loadstor management command to populate your database. Make sure to supp
     $ ./manage.py loadstor /path/to/rdf/data.ttl graphname
 
 Now you can run the server and point your browser to, e.g., http://localhost:4000/admin where you can login and manage the RDF graph.
+
+Quick Start (Docker)
+-----------
+
+The repository also now works with Docker and can provision resources via docker-compose. This is the recommended approach. To start this way:
+
+Make sure Docker is installed and the Docker daemon is running. 
+
+Clone the repository and cd into the directory you cloned to.
+
+From here, you want to build your images, which could take a while:
+
+    $ docker-compose build
+
+Now you're ready to bring up the services in daemon mode:
+
+    $ docker-compose up -d
+
+Your application is listening on port 80 of your Docker default machine, e.g., http://192.168.99.100/
+
+Run your migrations:
+
+    $ docker-compose run web python manage.py migrate
+
+Create a superuser:
+
+    $ docker-compose run web python manage.py createsuperuser
+
+And load your files. While the non-Docker startup will let you load from the local filesystem, in the Docker startup, you will need to specify a URL:
+
+    $ docker-compose run web python manage.py loadstor http://path.to/some/rdf.ttl graphname
+
+If you want to use the admin and have it look pretty, you will want to collect the static files:
+
+    $ docker-compose run web python manage.py collectstatic --noinput
+
+If all went well, you should be able to navigate to, e.g., http://192.168.99.100/admin and login as the superuser you made. Since there are no public endpoints, all management is done in the admin.
 
 Notes
 -----

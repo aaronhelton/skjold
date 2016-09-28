@@ -10,3 +10,5 @@ semdata
 semdata/*
 gunicorn_start.sh
 *.swp
+web
+web/*

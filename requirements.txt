@@ -6,3 +6,5 @@ rdflib==4.2.1
 -e git+https://github.com/RDFLib/rdflib-sqlalchemy.git@4ee1791f463022063e3ba6e95703a8886dd5a1b7#egg=rdflib_sqlalchemy
 SQLAlchemy==1.0.12
 uWSGI==2.0.12
+gunicorn
+requests
