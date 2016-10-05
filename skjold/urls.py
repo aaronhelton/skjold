@@ -19,10 +19,26 @@ from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
+from semantic.models import Resource
+from rest_framework import routers, serializers, viewsets
+
+class ResourceSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = Resource
+    fields = ('subject',)
+
+class ResourceViewSet(viewsets.ModelViewSet):
+  queryset = Resource.objects.all()
+  serializer_class = ResourceSerializer
+
+router = routers.DefaultRouter()
+router.register(r'resources', ResourceViewSet)
 
 urlpatterns = [
     #url(r'^$', include('aspect.urls')),
+    url(r'^', include(router.urls)),
     url(r'^admin/', admin.site.urls),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += i18n_patterns(
