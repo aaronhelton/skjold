@@ -135,13 +135,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 from rdflib import ConjunctiveGraph
 from rdflib_sqlalchemy.SQLAlchemy import SQLAlchemy
 connect_string = ''.join([
-  'postgresql://', 
-  DATABASES['default']['USER'], 
-  ':', 
-  DATABASES['default']['PASSWORD'], 
-  '@', 
-  DATABASES['default']['HOST'], 
-  '/', 
+  'postgresql://',
+  DATABASES['default']['USER'],
+  ':',
+  DATABASES['default']['PASSWORD'],
+  '@',
+  DATABASES['default']['HOST'],
+  '/',
   DATABASES['default']['NAME']
 ])
 store = SQLAlchemy(identifier='skjold',configuration=connect_string)
@@ -155,5 +155,6 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
+    ],
+    'PAGE_SIZE': 10
 }
