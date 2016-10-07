@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-import hashlib
+import hashlib, json
 from django.core.exceptions import ValidationError
 from rdflib import ConjunctiveGraph, URIRef, Literal, RDF
 from rdflib_sqlalchemy.SQLAlchemy import SQLAlchemy
@@ -14,7 +14,7 @@ class Resource(models.Model):
   subject = models.URLField(primary_key=True)
 
   def __str__(self):
-    return self.subject
+    return json.dumps(self.subject)
 
 class Klass(models.Model):
   value = models.URLField(primary_key=True)
@@ -53,7 +53,7 @@ class Namespace(models.Model):
 
 class AssertedStatement(models.Model):
   id = models.AutoField(primary_key=True)
-  subject = models.ForeignKey(Resource, to_field='subject', db_column='subject', related_name='as_subject')
+  subject = models.ForeignKey(Resource, to_field='subject', db_column='subject', related_name='asserted_statements')
   predicate = models.ForeignKey(Predicate, to_field='value', db_column='predicate')
   object = models.ForeignKey(Resource, to_field='subject', db_column='object', related_name='as_object')
   context = models.ForeignKey(Context, to_field='value', db_column='context')
@@ -75,7 +75,7 @@ class AssertedStatement(models.Model):
 
 class LiteralStatement(models.Model):
   id = models.AutoField(primary_key=True)
-  subject = models.ForeignKey(Resource, to_field='subject', db_column='subject')
+  subject = models.ForeignKey(Resource, to_field='subject', db_column='subject', related_name='literal_statements')
   predicate = models.ForeignKey(Predicate, to_field='value', db_column='predicate')
   object = models.TextField()
   context = models.ForeignKey(Context, to_field='value', db_column='context')
@@ -103,7 +103,7 @@ class LiteralStatement(models.Model):
 # I have made it ready and will maintain it to the same degree as the other *Statement models.
 class QuotedStatement(models.Model):
   id = models.AutoField(primary_key=True)
-  subject = models.ForeignKey(Resource, to_field='subject', db_column='subject')
+  subject = models.ForeignKey(Resource, to_field='subject', db_column='subject', related_name='quoted_statements')
   predicate = models.URLField()
   object = models.TextField()
   context = models.ForeignKey(Context, to_field='value', db_column='context')
@@ -125,10 +125,10 @@ class QuotedStatement(models.Model):
 
 class TypeStatement(models.Model):
   id = models.AutoField(primary_key=True)
-  member = models.ForeignKey(Resource, to_field='subject', db_column='member')
+  member = models.ForeignKey(Resource, to_field='subject', db_column='member', related_name='types')
   klass = models.URLField()
   context = models.ForeignKey(Context, to_field='value', db_column='context')
-  # termcomb needs to be calculated via int(rdflib_sqlalchemy.termutils.type2TermCombo(member,klass,context)) 
+  # termcomb needs to be calculated via int(rdflib_sqlalchemy.termutils.type2TermCombo(member,klass,context))
   termcomb = models.IntegerField(default=0)
 
   class Meta:
