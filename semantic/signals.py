@@ -1,7 +1,7 @@
 from django.db.models.signals import pre_save, pre_delete, post_save, post_delete
 from django.dispatch import receiver
 from django.conf import settings
-from rdflib_sqlalchemy.SQLAlchemy import SQLAlchemy
+from rdflib_sqlalchemy.store import SQLAlchemy
 from rdflib import ConjunctiveGraph, URIRef
 from semantic.models import Namespace, AssertedStatement, LiteralStatement, QuotedStatement, TypeStatement, Resource
 import sys

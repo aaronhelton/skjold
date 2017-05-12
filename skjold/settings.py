@@ -82,10 +82,10 @@ WSGI_APPLICATION = 'skjold.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'postgres',
+        'NAME': 'skjold_dev',
+        'USER': 'skjold_dev',
+        'PASSWORD': 'skjold',
+        'HOST': 'localhost',
         'PORT': 5432,
     }
 }
@@ -128,12 +128,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
 from rdflib import ConjunctiveGraph
-from rdflib_sqlalchemy.SQLAlchemy import SQLAlchemy
+from rdflib_sqlalchemy.store import SQLAlchemy
 connect_string = ''.join([
   'postgresql://',
   DATABASES['default']['USER'],

@@ -3,9 +3,9 @@ from django.conf import settings
 import hashlib, json
 from django.core.exceptions import ValidationError
 from rdflib import ConjunctiveGraph, URIRef, Literal, RDF
-from rdflib_sqlalchemy.SQLAlchemy import SQLAlchemy
-from rdflib_sqlalchemy.termutils import type2TermCombination
-from rdflib_sqlalchemy.termutils import statement2TermCombination
+from rdflib_sqlalchemy.store import SQLAlchemy
+from rdflib_sqlalchemy.termutils import type_to_term_combination
+from rdflib_sqlalchemy.termutils import statement_to_term_combination
 
 graph = settings.GRAPH
 identifier = settings.IDENTIFIER
@@ -57,7 +57,7 @@ class AssertedStatement(models.Model):
   predicate = models.ForeignKey(Predicate, to_field='value', db_column='predicate')
   object = models.ForeignKey(Resource, to_field='subject', db_column='object', related_name='as_object')
   context = models.ForeignKey(Context, to_field='value', db_column='context')
-  # termcomb here is calculated via int(statement2TermCombination(subject, predicate, obj, context))
+  # termcomb here is calculated via int(statement_to_term_combination(subject, predicate, obj, context))
   termcomb = models.IntegerField(default=0)
 
   class Meta:
@@ -70,7 +70,7 @@ class AssertedStatement(models.Model):
   #overrides
   def save(self, *args, **kwargs):
     #assumption is all three are URIRef. This might not be true.
-    self.termcomb = int(statement2TermCombination(URIRef(self.subject.subject), URIRef(self.predicate.value), URIRef(self.object.subject), graph.get_context(self.context.value)))
+    self.termcomb = int(statement_to_term_combination(URIRef(self.subject.subject), URIRef(self.predicate.value), URIRef(self.object.subject), graph.get_context(self.context.value)))
     super(AssertedStatement, self).save(*args, **kwargs)
 
 class LiteralStatement(models.Model):
@@ -79,7 +79,7 @@ class LiteralStatement(models.Model):
   predicate = models.ForeignKey(Predicate, to_field='value', db_column='predicate')
   object = models.TextField()
   context = models.ForeignKey(Context, to_field='value', db_column='context')
-  # here, termcomb is built via int(statement2TermCombination(subject, predicate, obj, context))
+  # here, termcomb is built via int(statement_to_term_combination(subject, predicate, obj, context))
   termcomb = models.IntegerField(default=0)
   # pre-save validation should try to catch that only one of the following is filled in
   objlanguage = models.CharField(max_length=255, blank=True, null=True)
@@ -94,7 +94,7 @@ class LiteralStatement(models.Model):
 
   #overrides
   def save(self, *args, **kwargs):
-    self.termcomb = int(statement2TermCombination(URIRef(self.subject.subject), URIRef(self.predicate.value), Literal(self.object), graph.get_context(self.context.value)))
+    self.termcomb = int(statement_to_term_combination(URIRef(self.subject.subject), URIRef(self.predicate.value), Literal(self.object), graph.get_context(self.context.value)))
     super(LiteralStatement, self).save(*args, **kwargs)
 
 
@@ -120,7 +120,7 @@ class QuotedStatement(models.Model):
 
   #overrides
   def save(self, *args, **kwargs):
-    self.termcomb = int(statement2TermCombination(URIRef(self.subject.subject), URIRef(self.predicate.value), Literal(self.object), graph.get_context(self.context.value)))
+    self.termcomb = int(statement_to_term_combination(URIRef(self.subject.subject), URIRef(self.predicate.value), Literal(self.object), graph.get_context(self.context.value)))
     super(QuotedStatement, self).save(*args, **kwargs)
 
 class TypeStatement(models.Model):
@@ -128,7 +128,7 @@ class TypeStatement(models.Model):
   member = models.ForeignKey(Resource, to_field='subject', db_column='member', related_name='types')
   klass = models.URLField()
   context = models.ForeignKey(Context, to_field='value', db_column='context')
-  # termcomb needs to be calculated via int(rdflib_sqlalchemy.termutils.type2TermCombo(member,klass,context))
+  # termcomb needs to be calculated via int(rdflib_sqlalchemy.termutils.type_to_term_combination(member,klass,context))
   termcomb = models.IntegerField(default=0)
 
   class Meta:
@@ -143,5 +143,5 @@ class TypeStatement(models.Model):
     # The only problem is that we can't know ahead of time whether our member/klass/context values are of type
     # BNode, Literal, URIRef, or Variable. Casting and testing for exceptions isn't helpful, so I'm not sure
     # what approach to take here.
-    self.termcomb = int(type2TermCombination(URIRef(self.member.subject), URIRef(self.klass), graph.get_context(self.context.value)))
+    self.termcomb = int(type_to_term_combination(URIRef(self.member.subject), URIRef(self.klass), graph.get_context(self.context.value)))
     super(TypeStatement, self).save(*args, **kwargs)

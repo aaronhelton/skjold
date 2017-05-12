@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from semantic.models import Resource, LiteralStatement, TypeStatement, AssertedStatement, QuotedStatement, Context, Klass, Namespace, Predicate
-from rdflib_sqlalchemy.termutils import type2TermCombination
-from rdflib_sqlalchemy.termutils import statement2TermCombination
+from rdflib_sqlalchemy.termutils import type_to_term_combination
+from rdflib_sqlalchemy.termutils import statement_to_term_combination
 from rdflib import URIRef, Literal
 from django.conf import settings
 
