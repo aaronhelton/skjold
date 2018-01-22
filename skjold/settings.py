@@ -25,8 +25,6 @@ SECRET_KEY = 'wv1w1ocwcf)lv^_byycqr*%dt72w^l*7n^by-7cjf8z+)_!6x8'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['52.20.172.127','metadata.un.org','metdata.dev.un.org']
-
 
 # Application definition
 
@@ -82,10 +80,10 @@ WSGI_APPLICATION = 'skjold.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'skjold_dev',
-        'USER': 'skjold_dev',
+        'NAME': 'skjold',
+        'USER': 'postgres',
         'PASSWORD': 'skjold',
-        'HOST': 'localhost',
+        'HOST': 'postgres',
         'PORT': 5432,
     }
 }

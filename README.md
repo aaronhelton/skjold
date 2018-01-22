@@ -5,33 +5,10 @@ This repository aims to provide a generic web platform to serve and manage RDF d
 
 It is a Django application backed by RDFLib-SQLAlchemy on a Postgres database.
 
-Quick Start (Normal)
+Quick Start
 -----------
 
-Make sure you have a Postgres database installed and running. Create a user and database for your application. The default username:password combo is postgres:postgres, and the default database name is postgres. 
-
-Clone the repository and install the requirements:
-
-    $ pip install -r requirements.txt
-
-Run migrations:
-
-    $ ./manage.py migrate
-
-Create a superuser:
-
-    $ ./manage.py createsuperuser
-
-Run the loadstor management command to populate your database. Make sure to supply both a path to a RDF file and the name of the graph you want to use for it:
-
-    $ ./manage.py loadstor /path/to/rdf/data.ttl graphname
-
-Now you can run the server and point your browser to, e.g., http://localhost:4000/admin where you can login and manage the RDF graph.
-
-Quick Start (Docker)
------------
-
-The repository also now works with Docker and can provision resources via docker-compose. This is the recommended approach. To start this way:
+The repository works with Docker and can provision resources via docker-compose. This is the recommended approach, although it is possible to follow a normal Django setup process as well. To start with Docker:
 
 Make sure Docker is installed and the Docker daemon is running. 
 
