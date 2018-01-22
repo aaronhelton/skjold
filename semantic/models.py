@@ -53,10 +53,10 @@ class Namespace(models.Model):
 
 class AssertedStatement(models.Model):
   id = models.AutoField(primary_key=True)
-  subject = models.ForeignKey(Resource, to_field='subject', db_column='subject', related_name='asserted_statements')
-  predicate = models.ForeignKey(Predicate, to_field='value', db_column='predicate')
-  object = models.ForeignKey(Resource, to_field='subject', db_column='object', related_name='as_object')
-  context = models.ForeignKey(Context, to_field='value', db_column='context')
+  subject = models.ForeignKey(Resource, to_field='subject', on_delete=models.CASCADE, db_column='subject', related_name='asserted_statements')
+  predicate = models.ForeignKey(Predicate, to_field='value', on_delete=models.CASCADE, db_column='predicate')
+  object = models.ForeignKey(Resource, to_field='subject', on_delete=models.CASCADE, db_column='object', related_name='as_object')
+  context = models.ForeignKey(Context, to_field='value', on_delete=models.CASCADE, db_column='context')
   # termcomb here is calculated via int(statement_to_term_combination(subject, predicate, obj, context))
   termcomb = models.IntegerField(default=0)
 
@@ -75,10 +75,10 @@ class AssertedStatement(models.Model):
 
 class LiteralStatement(models.Model):
   id = models.AutoField(primary_key=True)
-  subject = models.ForeignKey(Resource, to_field='subject', db_column='subject', related_name='literal_statements')
-  predicate = models.ForeignKey(Predicate, to_field='value', db_column='predicate')
+  subject = models.ForeignKey(Resource, to_field='subject', on_delete=models.CASCADE, db_column='subject', related_name='literal_statements')
+  predicate = models.ForeignKey(Predicate, to_field='value', on_delete=models.CASCADE, db_column='predicate')
   object = models.TextField()
-  context = models.ForeignKey(Context, to_field='value', db_column='context')
+  context = models.ForeignKey(Context, to_field='value', on_delete=models.CASCADE, db_column='context')
   # here, termcomb is built via int(statement_to_term_combination(subject, predicate, obj, context))
   termcomb = models.IntegerField(default=0)
   # pre-save validation should try to catch that only one of the following is filled in
@@ -103,10 +103,10 @@ class LiteralStatement(models.Model):
 # I have made it ready and will maintain it to the same degree as the other *Statement models.
 class QuotedStatement(models.Model):
   id = models.AutoField(primary_key=True)
-  subject = models.ForeignKey(Resource, to_field='subject', db_column='subject', related_name='quoted_statements')
+  subject = models.ForeignKey(Resource, to_field='subject', on_delete=models.CASCADE, db_column='subject', related_name='quoted_statements')
   predicate = models.URLField()
   object = models.TextField()
-  context = models.ForeignKey(Context, to_field='value', db_column='context')
+  context = models.ForeignKey(Context, to_field='value', on_delete=models.CASCADE, db_column='context')
   termcomb = models.IntegerField(default=0)
   objlanguage = models.CharField(max_length=255, blank=True, null=True)
   objdatatype = models.CharField(max_length=255, blank=True, null=True)
@@ -125,9 +125,9 @@ class QuotedStatement(models.Model):
 
 class TypeStatement(models.Model):
   id = models.AutoField(primary_key=True)
-  member = models.ForeignKey(Resource, to_field='subject', db_column='member', related_name='types')
+  member = models.ForeignKey(Resource, to_field='subject', on_delete=models.CASCADE, db_column='member', related_name='types')
   klass = models.URLField()
-  context = models.ForeignKey(Context, to_field='value', db_column='context')
+  context = models.ForeignKey(Context, to_field='value', on_delete=models.CASCADE, db_column='context')
   # termcomb needs to be calculated via int(rdflib_sqlalchemy.termutils.type_to_term_combination(member,klass,context))
   termcomb = models.IntegerField(default=0)
 
